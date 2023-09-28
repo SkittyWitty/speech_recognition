@@ -1,5 +1,5 @@
-from tensorflow.keras.layers import InputLayer, Dense, BatchNormalization
-from tensorflow.keras import regularizers
+from keras.layers import InputLayer, Dense, BatchNormalization
+from keras import regularizers
 
 # local modules
 from library.model_gen import build_model
@@ -21,7 +21,6 @@ architectures = {
                                 regularizers.l2(l2_penalty)})] * hidden_n,
         (Dense, [output_n], {'activation': 'softmax'})
     ],
-
 }
 
 def get_model(name, *args):

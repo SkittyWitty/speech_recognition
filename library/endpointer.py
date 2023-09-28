@@ -2,7 +2,7 @@ from sklearn.mixture import GaussianMixture
 import numpy as np
 
 # Add on modules (conda/pip)
-import librosa.feature
+from librosa.feature import rms
 
 # project modules
 from .conversions import ms_to_samples
@@ -88,7 +88,7 @@ def speech_detector(samples, Fs, adv_ms, len_ms):
     eps = 1e-5  # Small offset to prevent log 0
     # The frame advance is sometimes called the hop.
     # samples is N x channels, librosa expects channels by samples (transpose)
-    rms_dB = 20 * np.log10(librosa.feature.rms(
+    rms_dB = 20 * np.log10(rms(
         y=samples.T, hop_length=adv_n, frame_length=len_n) + eps)
     # librosa returns freqbins x channels x frames as it also handles
     # spectrogram energy.  Remove extraneous bin and transpose as GMM expects

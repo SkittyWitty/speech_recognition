@@ -94,7 +94,7 @@ class King:
 
         return
 
-    def __getitem__(self, speaker) -> list[str]:
+    def __getitem__(self, speaker):
         """
         Return audio files for specified speaker, e.g. king[23]
         :param speaker: speaker number
@@ -108,7 +108,7 @@ class King:
         return filelist
 
 
-    def get_speakers(self) -> list[int]:
+    def get_speakers(self):
         """
         Return a list of speakers for which we have data
         :return:

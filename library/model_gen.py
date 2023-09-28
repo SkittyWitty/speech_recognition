@@ -5,8 +5,8 @@ structures. Supports anything that can be created using Keras's Sequential
 interface.
 """
 
-from tensorflow.keras.models import Sequential
-import tensorflow.keras.backend as K
+from keras.models import Sequential
+import keras.backend as K
 
 
 def build_model(specification, name="model"):
