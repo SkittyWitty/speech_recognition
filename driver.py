@@ -60,8 +60,8 @@ def main(args):
     # train the model against the first 5 utterances of each speaker
     train(base_model, train_samples, train_labels, epochs_n=3)
 
-    # # Load in all features related to a single speaker
-    confusion_matrix = test(base_model, king, testing_speakers[0], adv_ms, len_ms, encorder)
+    # Load in all features related to a single speaker
+    confusion_matrix = test(base_model, king, testing_speakers, adv_ms, len_ms, encorder)
     confusion_matrix.plot()
     plt.show()
 

@@ -27,7 +27,7 @@ def train(model, features, labels, epochs_n=20):
     model.fit(x=features, 
               y=labels, 
               validation_split=.1, # data is selected from the last samples in the x and y data provided
-              shuffly=True,
+              shuffle=True,
               epochs=epochs_n)
     
     # Run metrics?
@@ -36,17 +36,20 @@ def train(model, features, labels, epochs_n=20):
 
     return model
 
-def split_feature_label(speakers, corpus, encoder, adv_ms, len_ms):
+def get_x_y(speaker, corpus, encoder, adv_ms, len_ms):
+    """
+    
+    """
     samples = []
     labels  = []
-    for i in speakers:
-        for file in corpus[i]:
-            features, new_labels = get_features(file, adv_ms, len_ms, i)
-            new_labels = encoder.transform(new_labels.reshape(-1, 1)).A
 
-            if(samples is not None):
-                samples.append(features)
-                labels.append(new_labels)
+    for file in corpus[speaker]:
+        features, new_labels = get_features(file, adv_ms, len_ms, speaker)
+        new_labels = encoder.transform(new_labels.reshape(-1, 1)).A
+
+        if(samples is not None):
+            samples.append(features)
+            labels.append(new_labels)
 
     samples = np.concatenate(samples)
     labels  = np.concatenate(labels)
@@ -56,46 +59,60 @@ def split_feature_label(speakers, corpus, encoder, adv_ms, len_ms):
 
 def test(model, corpus, test_utterances, adv_ms, len_ms, one_hot_encoder):
     """
-    Execute all, print error rate and return confusion matrix
+    Prints the error rate
+    return
+        confusion matrix - ready for display via matplotlib
     """ 
-    x, y = split_feature_label(test_utterances, corpus, one_hot_encoder, adv_ms, len_ms):
-    one_hot_encoded_label = one_hot_encoder(y[0])
-    target_label = test_utterances
+    # Keep track of predictions
+    speaker_predictions = np.zeros((25, 25))
 
-    # Returns an array with containing 1 entry for each utterance given
-    # Each element in the array is the speaker the model thought the utterance belonged to
-    predictions = model.predict(x) 
+    # Collects features and labels
+    for speaker in test_utterances:
+        x, y = get_x_y(speaker, corpus, one_hot_encoder, adv_ms, len_ms)
+        target_label = corpus.speaker_category(speaker)
 
-    # Assume that frames are independent and take the product of the probabilities. 
-    # Do so in the log domain (multiplication becomes addition) or your computation will underflow.
-   
-    # Summation across columns where each column holds the
-    # probability of a speaker's identification  
-    probability_per_feature = np.sum(predictions, axis=0)
-    
-    # argmax retuns the index with the highest prediction score
-    index_predicted = np.argmax(probability_per_feature)
-    # Find the index that occurs the most
-    target_predicted = corpus.category_to_speaker(index_predicted)
-    
-    print(f"Actual Speaker: {target_label}")
-    print(f"Predicted Speaker: {target_predicted}")
+        # Returns an array with containing 1 entry for each utterance given
+        # Each element in the array is the speaker the model thought the utterance belonged to
+        frame_predictions = model.predict(x) 
 
-    # Figure out how many of those labels were the target speaker
-    error_rate = correct_predictions / len(y)
+        # Assume that frames are independent and take the product of the probabilities
+        # Place predictions into log domain
+        frame_predictions = np.log(frame_predictions)
 
-    # Add prediction to the confusion matrix
-    n=1
-    np.zeros((n,n))
+        # Multiplication becomes addition due to log domain
+        # Summation across columns where each column holds the probability of a speaker's identification  
+        probability_per_feature = np.sum(frame_predictions, axis=0)
+        
+        # argmax retuns the index with the highest prediction score
+        index_predicted = np.argmax(probability_per_feature)
 
-    # Confusion Matrix for each speaker classified
-    conf_matrix = ConfusionMatrixDisplay(display_labels=test_utterances)
+        # Update the tracker
+        speaker_predictions[target_label][index_predicted]+= 1
+        
+        # Find the index that occurs the most
+        speaker_predicted = corpus.category_to_speaker(index_predicted)
+        print(f"Actual Speaker: {speaker}")
+        print(f"Predicted Speaker: {speaker_predicted}")
 
-    disp = ConfusionMatrixDisplay(confusion_matrix=[predictions, labels],
-                                display_labels=test_utterances[0])
-
-    print(f"Error Rate: {error_rate}")
-
+    # Create a confusion matrix using our track record
+    conf_matrix = confusion_matrix_calc(speaker_predictions, corpus.get_speakers())
     return conf_matrix
 
 
+def confusion_matrix_calc(speaker_predictions, speaker_list):
+    """
+    speaker_predictions - The predictions that were made
+    speaker_list - The speakers we predicted for
+    """
+    correct_predictions = np.trace(speaker_predictions)
+    total_predictions = np.sum(speaker_predictions)
+
+    # Figure out how many of those labels were the target speaker
+    error_rate =  1.0 - (correct_predictions / np.sum(total_predictions))
+
+    # Confusion Matrix for each speaker classified
+    disp = ConfusionMatrixDisplay(confusion_matrix=speaker_predictions,
+                                display_labels=speaker_list)
+
+    print(f"Error Rate: {error_rate}")
+    return disp
