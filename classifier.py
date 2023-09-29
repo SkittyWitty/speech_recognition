@@ -23,17 +23,13 @@ def train(model, features, labels, epochs_n=20):
     # training and 10% for validation. The validation data can be provided to keras’s fit 
     # function and can show you how your model is performing during training. Do not expect 
     # wonderful accuracy at this stage.
-    model.compile()
+    model.compile(optimizer = "adam", loss = "categorical_crossentropy", metrics = ["accuracy"])
     model.fit(x=features, 
               y=labels, 
               validation_split=.1, # data is selected from the last samples in the x and y data provided
               shuffle=True,
               epochs=epochs_n)
     
-    # Run metrics?
-    #TODO: View Accuracy
-    print(f"Accurance of Model")
-
     return model
 
 def get_x_y(speaker, corpus, encoder, adv_ms, len_ms):
@@ -47,9 +43,8 @@ def get_x_y(speaker, corpus, encoder, adv_ms, len_ms):
         features, new_labels = get_features(file, adv_ms, len_ms, speaker)
         new_labels = encoder.transform(new_labels.reshape(-1, 1)).A
 
-        if(samples is not None):
-            samples.append(features)
-            labels.append(new_labels)
+        samples.append(features)
+        labels.append(new_labels)
 
     samples = np.concatenate(samples)
     labels  = np.concatenate(labels)

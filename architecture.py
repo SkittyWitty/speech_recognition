@@ -17,8 +17,7 @@ architectures = {
         (InputLayer, [], {'input_shape':(features_n,)}),
         (BatchNormalization, [], {}),
         *[(Dense, [width_n], {'activation': 'relu',
-                            "kernel_regularizer":
-                                regularizers.l2(l2_penalty)})] * hidden_n,
+                              'kernel_regularizer': regularizers.l2(l2_penalty)})] * hidden_n,
         (Dense, [output_n], {'activation': 'softmax'})
     ],
 }

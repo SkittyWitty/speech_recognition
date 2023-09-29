@@ -45,25 +45,26 @@ def main(args):
             features, labels = get_features(file, adv_ms, len_ms, i)
             labels = encorder.transform(labels.reshape(-1, 1)).A
 
-            if(train_samples is not None):
-                train_samples = np.concatenate([train_samples, features])
-                train_labels  = np.concatenate([train_labels, labels])
-            else:
-                train_samples = features
-                train_labels = labels
+            train_samples.append(features)
+            train_labels.append(labels)
+
+    train_samples = np.concatenate(features)
+    train_labels  = np.concatenate(labels)
+
 
     # Initialize model
     feature_width = len(train_samples[0])
     total_speakers = len(speakers) # Gives us the total categories
-    base_model = get_model('l2', feature_width, 3, 20, .01, total_speakers)
+    base_model = get_model('l2', feature_width, 10, 20, .01, total_speakers)
 
     # train the model against the first 5 utterances of each speaker
-    train(base_model, train_samples, train_labels, epochs_n=3)
+    train(base_model, train_samples, train_labels, epochs_n=5)
 
     # Load in all features related to a single speaker
     confusion_matrix = test(base_model, king, testing_speakers, adv_ms, len_ms, encorder)
     confusion_matrix.plot()
     plt.show()
+    print("Test Stop")
 
 def format_one_hot(labels):
     categories = []
