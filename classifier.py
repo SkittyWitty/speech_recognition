@@ -26,9 +26,9 @@ def train(model, features, labels, epochs_n=20):
     model.compile(optimizer = "adam", loss = "categorical_crossentropy", metrics = ["accuracy"])
     model.fit(x=features, 
               y=labels, 
-              validation_split=.1, # data is selected from the last samples in the x and y data provided
               shuffle=True,
-              epochs=epochs_n)
+              epochs=epochs_n,
+              batch_size=20)
     
     return model
 
@@ -76,10 +76,10 @@ def test(model, corpus, test_utterances, adv_ms, len_ms, one_hot_encoder):
 
         # Multiplication becomes addition due to log domain
         # Summation across columns where each column holds the probability of a speaker's identification  
-        probability_per_feature = np.sum(frame_predictions, axis=0)
+        probability_per_category = np.sum(frame_predictions, axis=0)
         
         # argmax retuns the index with the highest prediction score
-        index_predicted = np.argmax(probability_per_feature)
+        index_predicted = np.argmax(probability_per_category)
 
         # Update the tracker
         speaker_predictions[target_label][index_predicted]+= 1

@@ -1,4 +1,4 @@
-from keras.layers import InputLayer, Dense, BatchNormalization
+from keras.layers import InputLayer, Dense, Dropout, Flatten, BatchNormalization, Conv1D, MaxPooling1D
 from keras import regularizers
 
 # local modules
@@ -20,6 +20,34 @@ architectures = {
                               'kernel_regularizer': regularizers.l2(l2_penalty)})] * hidden_n,
         (Dense, [output_n], {'activation': 'softmax'})
     ],
+
+    # Garbage
+    'test': lambda features_n, hidden_n, width_n, l2_penalty, output_n:
+    [
+        (InputLayer, [], {'input_shape':(features_n,)}),
+        (BatchNormalization, [], {}),
+        *[(Dense, [100], {'activation': 'relu',
+                              'kernel_regularizer': regularizers.l2(l2_penalty)})] * hidden_n,
+        *[(Dense, [50], {'activation': 'relu',
+                              'kernel_regularizer': regularizers.l2(l2_penalty)})] * hidden_n,
+        *[(Dense, [25], {'activation': 'relu',
+                              'kernel_regularizer': regularizers.l2(l2_penalty)})] * hidden_n,
+        #(Dropout, [0.3], {}),
+        (Dense, [output_n], {'activation': 'softmax'})
+    ],
+    'conv': lambda features_n, output_n:
+    [
+        (InputLayer, [], {'input_shape':(features_n,)}),
+        (Conv1D, [256, 5], {'activation': 'relu', "strides": '1',
+                            'padding': 'same'}),
+        (MaxPooling1D, [], {'pool_size':'5', 'strides' : '2', 
+                              'padding' : 'same'}),                
+        (Flatten, [], {}),
+        (Dense, [25], {'activation': 'relu',
+                              'kernel_regularizer': regularizers.l2(0.01)}),
+        (Dense, [output_n], {'activation': 'softmax'})
+    ],
+
 }
 
 def get_model(name, *args):

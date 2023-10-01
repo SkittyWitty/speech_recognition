@@ -38,8 +38,8 @@ def main(args):
     testing_speakers = speakers[5:]
 
     # Training data
-    train_samples = None
-    train_labels  = None
+    train_samples = []
+    train_labels  = []
     for i in training_speakers:
         for file in king[i]:
             features, labels = get_features(file, adv_ms, len_ms, i)
@@ -48,15 +48,14 @@ def main(args):
             train_samples.append(features)
             train_labels.append(labels)
 
-    train_samples = np.concatenate(features)
-    train_labels  = np.concatenate(labels)
-
+    train_samples = np.concatenate(train_samples)
+    train_labels  = np.concatenate(train_labels)
 
     # Initialize model
     feature_width = len(train_samples[0])
     total_speakers = len(speakers) # Gives us the total categories
-    base_model = get_model('l2', feature_width, 10, 20, .01, total_speakers)
-
+    base_model = get_model('l2', feature_width, 2, 50, .01, total_speakers)
+    base_model.summary()
     # train the model against the first 5 utterances of each speaker
     train(base_model, train_samples, train_labels, epochs_n=5)
 
