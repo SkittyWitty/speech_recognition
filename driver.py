@@ -6,16 +6,12 @@ Mindy Flores
 """
 
 from argparse import ArgumentParser
-import numpy as np
-from keras.utils import to_categorical
 import matplotlib.pyplot as plt
 import matplotlib
 
 # project imports
 from library.corpus import King
-from library.audio_io import read_wav
-from library.timer import Timer
-from feature_extraction import get_features
+from feature_extraction import  get_formatted_features
 from architecture import get_model
 from classifier import train, test
 from sklearn.preprocessing import OneHotEncoder
@@ -25,62 +21,69 @@ def main(args):
     matplotlib.use("QtAgg")
     plt.ion()
 
+    # Parsing framing parameter
     adv_ms = args.adv_ms
     len_ms = args.len_ms
 
-    # Expect speakers 27 to 60 to be availible
-    # Total: 25 speakers
+    # Setting up the corpus to be used
     king = King(args.king, group="Nutley")
-    
-    speakers = list(king.get_speakers()) # We can use catagory_2_speaker to translate index to speaker ID
-    encorder = create_one_hot(speakers)
-    training_speakers = speakers[:5]
-    testing_speakers = speakers[5:]
+    speakers = list(king.get_speakers())
+    total_speakers = len(speakers) # Gives us the total categories
 
-    # Training data
-    train_samples = []
-    train_labels  = []
-    for i in training_speakers:
-        for file in king[i]:
-            features, labels = get_features(file, adv_ms, len_ms, i)
-            labels = encorder.transform(labels.reshape(-1, 1)).A
+    # Create an encoder that coverts a category to a one-hot enocoding
+    encorder = create_one_hot_encoder(speakers)
 
-            train_samples.append(features)
-            train_labels.append(labels)
+    # Split utterances into test and training sets
+    train_test_split = 5
+    training_utterences = []
+    testing_utterences = []
+    for speaker in speakers:
+        # Each index corresponds to a speaker category hence we must maintain the ordering
+        speaker_files = king[speaker]
 
-    train_samples = np.concatenate(train_samples)
-    train_labels  = np.concatenate(train_labels)
+        # Split utterences in each category to test and training
+        # based on split parameter
+        training_utterences.append(speaker_files[:train_test_split])
+        testing_utterences.append(speaker_files[train_test_split:])
+
+    # Prepare training utterances
+    train_samples, train_labels = get_formatted_features(training_utterences, king, encorder, adv_ms, len_ms)
 
     # Initialize model
     feature_width = len(train_samples[0])
-    total_speakers = len(speakers) # Gives us the total categories
-    base_model = get_model('l2', feature_width, 2, 50, .01, total_speakers)
-    base_model.summary()
-    # train the model against the first 5 utterances of each speaker
-    train(base_model, train_samples, train_labels, epochs_n=5)
+    model         = get_model('dropout', feature_width, 1, 1, .01, total_speakers)
+    model.summary() # Print specifications of model created
 
-    # Load in all features related to a single speaker
-    confusion_matrix = test(base_model, king, testing_speakers, adv_ms, len_ms, encorder)
+    # Train the model against the first 5 utterances of each speaker
+    train(model, train_samples, train_labels, epochs_n=5)
+
+    # Test on the remaining utterances
+    confusion_matrix = test(model, king, testing_utterences, adv_ms, len_ms, encorder)
+
+    # Display the Confusion Matrix
     confusion_matrix.plot()
     plt.show()
-    print("Test Stop")
 
-def format_one_hot(labels):
+    print("Artificial Breakpoint Stop")
+
+def create_one_hot_encoder(speaker_list):
+    """
+    description
+        Creates a one hot encoder based on the category's provided
+    parameters
+        speaker_list - all categories that may be predicted in the model
+    returns
+        One-hot Encoder
+    """
+    # Format the list of categories
     categories = []
-    for speaker in labels:
+    for speaker in speaker_list:
         categories.append([speaker])
-    return categories
-
-def create_one_hot(speaker_list):
-    # Create the list of categories in the
-    # format expected of scikit-learn 
-    categories = format_one_hot(speaker_list)
 
     # Generate the one-hot encorder
     one_hot = OneHotEncoder()
     one_hot.fit(categories)
     return one_hot
-
 
 if __name__ == "__main__":
 
