@@ -1,4 +1,6 @@
 /king
+test_*
+*tips.txt
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
