@@ -20,9 +20,9 @@ architectures = {
                               'kernel_regularizer': regularizers.l2(l2_penalty)})] * hidden_n,
         (Dense, [output_n], {'activation': 'softmax'})
     ],
-
-    # Garbage
-    'test': lambda features_n, hidden_n, width_n, l2_penalty, output_n:
+    # Pairs down nodes throughout the network prior to reaching the softmax layer
+    # Adds in dropout for experimentation
+    'dropout': lambda features_n, hidden_n, width_n, l2_penalty, output_n:
     [
         (InputLayer, [], {'input_shape':(features_n,)}),
         (BatchNormalization, [], {}),
@@ -32,9 +32,10 @@ architectures = {
                               'kernel_regularizer': regularizers.l2(l2_penalty)})] * hidden_n,
         *[(Dense, [25], {'activation': 'relu',
                               'kernel_regularizer': regularizers.l2(l2_penalty)})] * hidden_n,
-        #(Dropout, [0.3], {}),
+        (Dropout, [0.3], {}),
         (Dense, [output_n], {'activation': 'softmax'})
     ],
+    # Does not work currently. Network that implements convolutional layers.
     'conv': lambda features_n, output_n:
     [
         (InputLayer, [], {'input_shape':(features_n,)}),
