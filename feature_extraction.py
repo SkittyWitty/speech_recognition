@@ -1,7 +1,9 @@
 
 # Add-on packages
 import numpy as np
-from librosa import stft  # Short-time Fourier transform
+
+# Short-time Fourier transform
+from librosa import stft  # If there is an issue with this pip uninstall and re-install soundfile "pip soundfile"
 from librosa.feature import melspectrogram
 
 # Project packages
@@ -9,6 +11,49 @@ from library.conversions import ms_to_samples
 from library.audio_io import read_wav
 from library.endpointer import speech_detector
 from library.visualize import plot_spectrogram
+
+def format_training_features(utterences, corpus, encoder, adv_ms, len_ms):
+    """
+    description
+        Formats features and labels for training.
+        Utterances must be given in increasing categorical order. 
+        i.e 
+            index 0 in utterenace corresponding to all audio files 
+            that corresponding to the first category in the corpus
+    parameters
+        utterences - the audio files containing utterances features will be extracted from
+        corpus     - the corpus used to maintain categories and speakers
+        encoder    - strategy for how labels should be encoded
+        adv_ms     - frame advance in milliseconds
+        len_ms     - Length of frames in milliseconds
+    returns
+        samples - all samples
+        labels - in corresponding order to the samples, encoded
+    """
+    samples = []
+    labels  = []
+    current_category = 0 
+    for speaker_utterences in utterences:
+        speaker_id = corpus.category_to_speaker(current_category)
+
+        for file in speaker_utterences: 
+            # Retrieve features and labels from audio file
+            features, new_labels = get_features(file, adv_ms, len_ms, speaker_id, debug=False)
+            # Format labels to be accepted by the encoder and produce encoded labels
+            new_labels = encoder.transform(new_labels.reshape(-1, 1)).A
+
+            samples.append(features)
+            labels.append(new_labels)
+
+        # Move onto the next category
+        current_category += 1
+
+    # Concatenate to match expected format for training
+    # Concatenate at end to save on memory allocation operation
+    samples = np.concatenate(samples)
+    labels  = np.concatenate(labels)
+
+    return samples, labels
 
 def get_features(filename: str, adv_ms:float, len_ms: float, label: int,
                  spectral_means_subtraction=True,

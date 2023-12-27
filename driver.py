@@ -1,20 +1,17 @@
-"""
-I promise that the attached assignment is my own work. 
-I recognize that should this not be the case,
-I will be subject to penalties as outlined in the course syllabus.
-Mindy Flores
-"""
-
 from argparse import ArgumentParser
 import matplotlib.pyplot as plt
 import matplotlib
 
 # project imports
 from library.corpus import King
-from feature_extraction import  get_formatted_features
+from feature_extraction import format_training_features
 from architecture import get_model
 from classifier import train, test
 from sklearn.preprocessing import OneHotEncoder
+
+# Post Assigmnet turn in notes
+# Load Test and Train seperately not all at the same time
+# There are comments on the the classifier that I need to review
 
 def main(args):
     # Specify how matplotlib renders (backend library)
@@ -47,18 +44,18 @@ def main(args):
         testing_utterences.append(speaker_files[train_test_split:])
 
     # Prepare training utterances
-    train_samples, train_labels = get_formatted_features(training_utterences, king, encorder, adv_ms, len_ms)
+    train_samples, train_labels = format_training_features(training_utterences, king, encorder, adv_ms, len_ms)
 
     # Initialize model
     feature_width = len(train_samples[0])
-    model         = get_model('dropout', feature_width, 1, 1, .01, total_speakers)
+    model         = get_model('l2', feature_width, 2, 50, .01, total_speakers)
     model.summary() # Print specifications of model created
 
     # Train the model against the first 5 utterances of each speaker
     train(model, train_samples, train_labels, epochs_n=5)
 
     # Test on the remaining utterances
-    confusion_matrix = test(model, king, testing_utterences, adv_ms, len_ms, encorder)
+    confusion_matrix = test(model, king, testing_utterences, adv_ms, len_ms)
 
     # Display the Confusion Matrix
     confusion_matrix.plot()
