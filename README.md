@@ -28,7 +28,9 @@ Neural Networks are built using a a 90/10 training/validation and area kept shal
 |Intermittant Dropout Model|21%|
 
 ### Best Performing Model
-
+Wide Model Confusion Matrix
+![Wide Model Confusion Matrix](./experiment_images/ex2_wide_model/ex2_cm.png "Wide Model Confusion Matrix")
+ 
 
 ## References
 Higgins, A. and Vermilyea, D. (1995). King Speaker Verification, (ed. I. T. a. T. Corporation). 3600 Market Street, Suite 810, Philadelphia, PA 19104-2653: Linguistic Data Consortium. 
