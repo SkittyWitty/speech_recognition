@@ -29,7 +29,7 @@ Neural Networks are built using a a 90/10 training/validation and area kept shal
 
 ### Best Performing Model
 Wide Model Confusion Matrix
-![Wide Model Confusion Matrix](./experiment_images/ex2_wide_model/ex2_cm.png "Wide Model Confusion Matrix")
+![Wide Model Confusion Matrix](./experiment_images/ex2_wide_model/ex2_wide_cm.png "Wide Model Confusion Matrix")
  
 
 ## References
