@@ -1,4 +1,6 @@
 # Speaker Identification 
+Project for Speech Processing 2023. 
+Credit to Dr. Marie Roch for model generation code and project architecture. 
 
 ## Background
 The King corpus is comprised of 51 male speakers recorded by The International Telephone Corporation in San Diego, CA and Nutley, NJ. 
@@ -30,5 +32,5 @@ Wide Model Confusion Matrix
 ![Wide Model Confusion Matrix](./experiment_images/ex2_wide_model/ex2_cm.png "Wide Model Confusion Matrix")
  
 
-## Credit
+## References
 Higgins, A. and Vermilyea, D. (1995). King Speaker Verification, (ed. I. T. a. T. Corporation). 3600 Market Street, Suite 810, Philadelphia, PA 19104-2653: Linguistic Data Consortium. 
