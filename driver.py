@@ -48,7 +48,7 @@ def main(args):
 
     # Initialize model
     feature_width = len(train_samples[0])
-    model         = get_model('l2', feature_width, 2, 50, .01, total_speakers)
+    model         = get_model('dropout', feature_width, 1, 50, .01, total_speakers)
     model.summary() # Print specifications of model created
 
     # Train the model against the first 5 utterances of each speaker

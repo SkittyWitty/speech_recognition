@@ -1,4 +1,4 @@
-from keras.layers import InputLayer, Dense, Dropout, Flatten, BatchNormalization, Conv1D, MaxPooling1D
+from keras.layers import InputLayer, Dense, Dropout, BatchNormalization, Conv1D
 from keras import regularizers
 
 # local modules
@@ -12,12 +12,24 @@ architectures = {
     # (0,1), *[(2, 3, 4)] * 2, (5,6)] -> [(0, 1), (2, 3, 4), (2, 3, 4), (5, 6)]
     # versus not using * in front of the list
     # [(0,1), [(2, 3, 4)] * 2, (5,6)] -> [(0, 1), [(2, 3, 4), (2, 3, 4)], (5, 6)]
-    'l2': lambda features_n, hidden_n, width_n, l2_penalty, output_n:
+    'base': lambda features_n, hidden_n, width_n, l2_penalty, output_n:
     [
         (InputLayer, [], {'input_shape':(features_n,)}),
         (BatchNormalization, [], {}),
         *[(Dense, [width_n], {'activation': 'relu',
                               'kernel_regularizer': regularizers.l2(l2_penalty)})] * hidden_n,
+        (Dense, [output_n], {'activation': 'softmax'})
+    ],
+    # Wide Network
+    'wide': lambda features_n, hidden_n, width_n, l2_penalty, output_n:
+    [
+        (InputLayer, [], {'input_shape':(features_n,)}),
+        (BatchNormalization, [], {}),
+        *[(Dense, [100], {'activation': 'relu',
+                              'kernel_regularizer': regularizers.l2(l2_penalty)})] * hidden_n,
+        (BatchNormalization, [], {}),
+        *[(Dense, [100], {'activation': 'relu',
+                'kernel_regularizer': regularizers.l2(l2_penalty)})] * hidden_n,
         (Dense, [output_n], {'activation': 'softmax'})
     ],
     # Pairs down nodes throughout the network prior to reaching the softmax layer
@@ -27,10 +39,10 @@ architectures = {
         (BatchNormalization, [], {}),
         *[(Dense, [100], {'activation': 'relu',
                               'kernel_regularizer': regularizers.l2(l2_penalty)})] * hidden_n,
-
+        (BatchNormalization, [], {}),
         *[(Dense, [50], {'activation': 'relu',
                               'kernel_regularizer': regularizers.l2(l2_penalty)})] * hidden_n,
-
+        (BatchNormalization, [], {}),
         *[(Dense, [25], {'activation': 'relu',
                               'kernel_regularizer': regularizers.l2(l2_penalty)})] * hidden_n,
         (Dense, [output_n], {'activation': 'softmax'})
@@ -40,14 +52,13 @@ architectures = {
     [
         (InputLayer, [], {'input_shape':(features_n,)}),
         (BatchNormalization, [], {}),
-        *[(Dense, [50], {'activation': 'relu',
+        *[(Dense, [100], {'activation': 'relu',
                               'kernel_regularizer': regularizers.l2(l2_penalty)})] * hidden_n,
-        (Dropout, [0.2], {}),
-        *[(Dense, [50], {'activation': 'relu',
+        (Dropout, [0.05], {}),
+        (BatchNormalization, [], {}),
+        *[(Dense, [100], {'activation': 'relu',
                               'kernel_regularizer': regularizers.l2(l2_penalty)})] * hidden_n,
-        (Dropout, [0.2], {}),
-        *[(Dense, [50], {'activation': 'relu',
-                              'kernel_regularizer': regularizers.l2(l2_penalty)})] * hidden_n,
+        (BatchNormalization, [], {}),
         (Dense, [output_n], {'activation': 'softmax'})
     ],
     'conv': lambda features_n, output_n:
@@ -55,7 +66,6 @@ architectures = {
         (InputLayer, [], {'input_shape':(features_n,)}),
         (Conv1D, [features_n], {'activation': 'relu', "strides": '1',
                             'padding': 'same'}),            
-        (Flatten, [], {}),
         (Dense, [25], {'activation': 'relu',
                               'kernel_regularizer': regularizers.l2(0.01)}),
         (Dense, [output_n], {'activation': 'softmax'})

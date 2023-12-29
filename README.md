@@ -20,16 +20,14 @@ Neural Networks are built using a a 90/10 training/validation and area kept shal
 ## Experiments
 |Model|Error Rate|
 | ------------- |-------------|
-|Base Model|40%|
-|Narrowing Nodes Model|60%|
-|Wide Model|16%|
-|Intermittant Dropout Model|~|
-|Convolutional Model|~|
-
+|Base Model|25%|
+|Narrowing Nodes Model|22%|
+|Wide Model|19%|
+|Intermittant Dropout Model|21%|
 
 ### Best Performing Model
-Narrowing Nodes
-![Narrowing Nodes Confusion Matrix](./experiment_images/ex2_wide_model/ex2_cm.png "Narrowing Nodes Confusion Matrix")
+Wide Model Confusion Matrix
+![Wide Model Confusion Matrix](./experiment_images/ex2_wide_model/ex2_cm.png "Wide Model Confusion Matrix")
  
 
 ## Credit
